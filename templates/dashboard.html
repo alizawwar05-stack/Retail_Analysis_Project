@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% block content %}
+  <section id="overview" class="page-heading">
+    <div>
+      <div class="eyebrow">THE BUSINESS AT A GLANCE</div>
+      <h1>Sales overview<span>.</span></h1>
+      <p>Explore your markets, products and customer purchasing patterns.</p>
+    </div>
+    <a class="button export"
+       href="{{ url_for('download', start=start, end=end, country=country) }}">↓ &nbsp; Export selection</a>
+  </section>
+  <form class="filters" method="get" action="/">
+    <div class="filter-heading">Filter your view<small>All figures follow this selection</small></div>
+    <label>
+      From<input type="date"
+       name="start"
+       value="{{ start }}"
+       min="{{ minimum }}"
+       max="{{ maximum }}"
+       required>
+    </label>
+    <label>
+      To<input type="date"
+       name="end"
+       value="{{ end }}"
+       min="{{ minimum }}"
+       max="{{ maximum }}"
+       required>
+    </label>
+    <label class="country-filter">Market<select name="country"><option value="">All countries</option>{% for name in countries %}<option value="{{ name }}" {% if name == country %}selected{% endif %}>{{ name }}</option>{% endfor %}</select></label>
+    <button class="button primary" type="submit">Apply filters</button><a class="reset" href="/">Reset</a>
+  </form>
+  <div class="selection-line"><span><span class="tiny-dot"></span> {{ country or 'All countries' }} <span class="separator">/</span> {{ start.strftime("%d %b %Y") }} – {{ end.strftime("%d %b %Y") }}</span><span>{{ stats.rows|number }} sales rows</span></div>
+  <section class="kpis" aria-label="Key performance indicators">
+    <article class="kpi featured">
+      <div class="kpi-title">Sales amount <span>£</span></div>
+      <div class="kpi-value">{{ stats.total|money }}</div>
+      <p>Positive sales · before credits</p>
+    </article>
+    <article class="kpi">
+      <div class="kpi-title">Quantity sold <span>▦</span></div>
+      <div class="kpi-value">{{ stats.quantity|number }}</div>
+      <p>Quantity across positive sales rows</p>
+    </article>
+    <article class="kpi">
+      <div class="kpi-title">Sales invoices <span>▤</span></div>
+      <div class="kpi-value">{{ stats.invoices|number }}</div>
+      <p>{{ stats.average|money }} average invoice value</p>
+    </article>
+    <article class="kpi">
+      <div class="kpi-title">Known customers <span>♧</span></div>
+      <div class="kpi-value">{{ stats.customers|number }}</div>
+      <p>Unique recorded customer IDs</p>
+    </article>
+  </section>
+  {% if not stats.rows %}<div class="empty-state" role="status"><strong>No sales in this selection.</strong><p>Try another country or a wider date range. No missing values have been replaced with sales.</p><a href="/">Reset filters →</a></div>{% endif %}
+  <section class="charts-grid">
+    <article class="panel trend-panel">
+      <div class="panel-heading">
+        <div>
+          <h2>Monthly sales</h2>
+          <p>Sales amount over time</p>
+        </div>
+        <span class="badge">GBP</span>
+      </div>
+      <div id="monthly-chart"
+           class="chart"
+           aria-label="Monthly sales line chart"></div>
+      <p class="chart-note">Dataset coverage: {{ coverage }}. Boundary months may be partial. Compare complete months when assessing growth.</p>
+    </article>
+    <article class="panel insight-panel"><div class="eyebrow">IN THIS SELECTION</div><h2>A closer look</h2>{% for item in stats.insights %}<div class="insight"><span class="insight-number">0{{ loop.index }}</span><div><h3>{{ item.title }}</h3><p>{{ item.text }}</p></div></div>{% else %}<p>Insights appear when your selection contains sales.</p>{% endfor %}<div class="insight-bottom">Explore the numbers. Ask better questions. <span>↗</span></div></article>
+  </section>
+  <div class="section-heading" id="markets">
+    <div>
+      <div class="eyebrow">WHERE SALES COME FROM</div>
+      <h2>Markets & products</h2>
+    </div>
+    <span>Top 10 by sales amount</span>
+  </div>
+  <section class="two-columns">
+    <article class="panel">
+      <div class="panel-heading">
+        <div>
+          <h2>Leading countries</h2>
+          <p>Market contribution · GBP</p>
+        </div>
+        <span class="badge">COUNTRY</span>
+      </div>
+      <div id="countries-chart"
+           class="chart tall"
+           aria-label="Top countries by sales"></div>
+    </article>
+    <article class="panel">
+      <div class="panel-heading">
+        <div>
+          <h2>Leading products</h2>
+          <p>Ranked by StockCode · GBP</p>
+        </div>
+        <span class="badge">PRODUCT</span>
+      </div>
+      <div id="products-chart"
+           class="chart tall"
+           aria-label="Top products by sales"></div>
+      <p class="chart-note">DOT, POST and M excluded. Hover over a bar for its product description.</p>
+    </article>
+  </section>
+  <div class="section-heading" id="customers">
+    <div>
+      <div class="eyebrow">UNDERSTAND YOUR CUSTOMERS</div>
+      <h2>Purchasing patterns</h2>
+    </div>
+    <span>Customers with a recorded ID</span>
+  </div>
+  <section class="customer-grid">
+    <article class="panel">
+      <div class="panel-heading">
+        <div>
+          <h2>One-time vs repeat</h2>
+          <p>Distinct invoices within your selected period</p>
+        </div>
+      </div>
+      <div id="customers-chart"
+           class="chart donut"
+           aria-label="One-time and repeat customer comparison"></div>
+      <div class="legend">
+        <div><span class="key teal"></span> Repeat<strong>{{ stats.repeat|number }}</strong></div>
+        <div><span class="key pale"></span> One-time<strong>{{ stats.once|number }}</strong></div>
+      </div>
+      <p class="chart-note">{{ '%.1f'|format(stats.known_share) }}% of selected sales rows have a CustomerID. This is repeat purchasing, not a retention rate.</p>
+    </article>
+    <article class="panel customer-table"><div class="panel-heading"><div><h2>Highest-spending customers</h2><p>Top 10 identified customers by sales</p></div></div><div class="table-scroll"><table><thead><tr><th>RANK</th><th>CUSTOMER ID</th><th>INVOICES</th><th>SALES (GBP)</th></tr></thead><tbody>{% for customer in stats.top_customers %}<tr><td class="rank">{{ '%02d'|format(loop.index) }}</td><td><span class="customer-dot"></span>{{ customer.label }}</td><td>{{ customer.invoices|number }}</td><td class="amount">{{ customer.amount|money }}</td></tr>{% else %}<tr><td colspan="4">No identified customers in this selection.</td></tr>{% endfor %}</tbody></table></div></article>
+  </section>
+  {% if cancellation %}
+    <section class="credit-panel">
+      <div>
+        <div class="eyebrow">CANCELLATION CREDITS</div>
+        <h2>{{ cancellation.amount|money }}</h2>
+        <p>Credit amount recorded during the selected dates and country.</p>
+      </div>
+      <div class="credit-stat"><strong>{{ cancellation.invoices|number }}</strong><span>Unique credit invoices</span></div>
+      <div class="credit-stat"><strong>{{ cancellation.rows|number }}</strong><span>Credit rows</span></div>
+      <p class="credit-note">C-prefixed invoices with negative quantity and positive price. These credits are not matched back to original purchases and are not deducted from the sales cards.</p>
+    </section>
+{% elif credit_error %}<p class="data-notice">Cancellation data could not be loaded: {{ credit_error }}</p>{% endif %}
+<section class="panel methodology" id="methodology">
+  <div class="panel-heading">
+    <div>
+      <div class="eyebrow">CONTEXT MATTERS</div>
+      <h2>About this analysis</h2>
+    </div>
+    <span class="badge">ONLINE RETAIL</span>
+  </div>
+  <div class="definition-grid">
+    <div>
+      <h3>What counts as a sale?</h3>
+      <p>Positive quantities and prices, excluding invoices beginning with C. Sales include postage and manual entries except in the product ranking. Amounts are in GBP, before credit deductions.</p>
+    </div>
+    <div>
+      <h3>How are customers counted?</h3>
+      <p>Distinct recorded CustomerIDs only. Repeat customers have more than one distinct sales invoice within the selected dates and country. Anonymous sales remain in overall totals.</p>
+    </div>
+    <div>
+      <h3>What are the limits?</h3>
+      <p>Exact duplicate rows were removed during cleaning. Partial months should not be compared as full months. High sales do not prove high profit; costs and linked returns are not available.</p>
+    </div>
+  </div>
+  </section>
+{% endblock %}
+{% block scripts %}
+  <script id="chart-data" type="application/json">{{ stats|tojson }}</script>
+  <script src="{{ url_for('plotly_library') }}" defer></script>
+  <script src="{{ url_for('static', filename='dashboard.js') }}" defer></script>
+{% endblock %}

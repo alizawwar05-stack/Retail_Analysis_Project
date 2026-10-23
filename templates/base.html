@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description"
+          content="Retail sales and customer analysis by Ali Zawwar. Explore sales, products and purchasing patterns.">
+    <title>Retail Lens | Sales & Customer Analysis</title>
+    <link rel="icon"
+          href="{{ url_for('static', filename='favicon.svg') }}"
+          type="image/svg+xml">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <aside class="sidebar">
+      <a class="brand" href="{{ url_for('dashboard') }}"><span class="brand-icon">▥</span><span>retail<span class="brand-light">lens</span><small>SALES INTELLIGENCE</small></span></a>
+      <div class="nav-label">WORKSPACE</div>
+      <nav aria-label="Main navigation">
+        <a href="/#overview" class="nav-item active"><span>◫</span> Overview</a>
+        <a href="/#markets" class="nav-item"><span>◎</span> Markets & products</a>
+        <a href="/#customers" class="nav-item"><span>♧</span> Customers</a>
+        <a href="/#methodology" class="nav-item"><span>≡</span> About the data</a>
+      </nav>
+      <div class="sidebar-note">
+        <span class="tiny-dot"></span> ONLINE RETAIL DATASET
+        <p>
+          Turn transactions into
+          <br>
+          clear business decisions.
+        </p>
+      </div>
+      <div class="profile"><span class="avatar">AZ</span><span>Ali Zawwar<small>Data analysis portfolio</small></span></div>
+    </aside>
+    <div class="workspace">
+      <header class="topbar">
+        <span>Workspace <b>/</b> Retail analytics</span><span class="project-tag"><span class="tiny-dot"></span> Portfolio project</span>
+      </header>
+      <main id="main">
+        {% block content %}{% endblock %}
+      </main>
+      <footer>
+        Retail Lens <span>Built by Ali Zawwar · Flask & Pandas</span><a href="/#methodology">Data definitions</a>
+      </footer>
+    </div>
+    {% block scripts %}{% endblock %}
+  </body>
+</html>

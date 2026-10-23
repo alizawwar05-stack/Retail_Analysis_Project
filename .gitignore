@@ -1,0 +1,34 @@
+# Python and local environments
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+.pytest_cache/
+
+# Generated notebook and editor state
+.ipynb_checkpoints/
+.virtual_documents/
+anaconda_projects/
+.vscode/
+
+# Large source/generated data stay local
+data/raw/*.xlsx
+data/processed/*.csv
+
+
+
+
+
+
+
+# Local dataset files
+data/raw/
+data/processed/*.csv
+
+# Temporary notebook and editor files
+.virtual_documents/
+anaconda_projects/
+.ipynb_checkpoints/
+**/.ipynb_checkpoints/
+.vscode/

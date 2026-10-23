@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+  <section class="setup-card">
+    <div class="eyebrow">RETAIL LENS / GET STARTED</div>
+    <h1>{{ 'Check your selection' if invalid else 'Your data. A clearer picture.' }}</h1>
+    <p class="setup-message">{{ message }}</p>
+    {% if not invalid %}
+      <ol>
+        <li>Copy your <strong>cleaned_sales.csv</strong> into <code>data/processed/</code>, beside this app.</li>
+        <li>Optionally add <strong>cleaned_transactions.csv</strong> to show cancellation credits.</li>
+        <li>Refresh this page to explore your results.</li>
+      </ol>
+      <p>No records have been loaded yet. Your original CSV files are read only.</p>
+    {% endif %}
+    <a class="button primary" href="/">{{ 'Reset filters' if invalid else 'Load my data' }} <span>↗</span></a>
+  </section>
+{% endblock %}
